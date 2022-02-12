@@ -16,7 +16,6 @@ Pinchable ScrollRect allows users to zoom in and out on the ScrollRect with both
 * The absolute minimum scale of the Content of the ScrollRect is 1. A customizable lower bound and upper bound of the scale can be set on inspector.
 * Any third touches detected after pinching will be ignore, even after both pinching touches are lifted.
 * Editor script is needed in order to serialize the extra fields added to the PinchableScrollRect component.
-* This plugin is created with Unity Editor 2018.4.
 
 ## License
 This plugin is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
