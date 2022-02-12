@@ -1,0 +1,22 @@
+{
+  "name": "com.LokoSolo.PinchableScrollRect",
+  "version": "1.0.0",
+  "displayName": "Pinchable ScrollRect",
+  "description": "Pinchable ScrollRect allows users to zoom in and out on the ScrollRect with both touches pinching input or mouse scroll input.",
+  "unity": "2018.4",
+  "documentationUrl": "https://github.com/LokoSoloGames/Unity_PinchableScrollRect/blob/master/Documentations/PinchableScrollRect-UserGuide.pdf",
+  "changelogUrl": "https://github.com/LokoSoloGames/Unity_PinchableScrollRect/blob/master/CHANGELOG.md",
+  "licensesUrl": "https://github.com/LokoSoloGames/Unity_PinchableScrollRect/blob/master/LICENSE",
+  "dependencies": {
+    "com.unity.modules.ui": "1.0.0"
+  },
+  "keywords": [
+    "UI",
+    "MultiTouch",
+    "Pinch"
+  ],
+  "author": {
+    "name": "LokoSolo",
+    "email": "lokosolo.games@gmail.com",
+  }
+}

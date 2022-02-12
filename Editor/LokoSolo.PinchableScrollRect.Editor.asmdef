@@ -1,0 +1,16 @@
+{
+    "name": "LokoSolo.PinchableScrollRect.Editor",
+    "references": [
+        "LokoSolo.PinchableScrollRect"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
