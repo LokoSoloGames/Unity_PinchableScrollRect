@@ -2,11 +2,11 @@
 	[DisallowMultipleComponent]
 	public class PinchInputDetector : UIBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler {
 		/* Calling Order: OnBeginDrag -> OnDrag -> OnEndDrag */
-		
+
 		private IPinchStartHandler[] pinchStartHandlers;
 		private IPinchEndHandler[] pinchEndHandlers;
 		private IPinchZoomHandler[] pinchZoomHandlers;
-		
+
 		private int touchCount = 0;
 		private bool pinching = false;
 
@@ -14,7 +14,7 @@
 		private PointerEventData secondPointer;
 		private float previousDistance = 0f;
 		private float delta = 0f;
-		
+
 		protected override void Awake() {
 			base.Awake();
 			pinchStartHandlers = GetComponents<IPinchStartHandler>();
@@ -43,7 +43,7 @@
 		// Similar behaviour as OnPointerUp but we are using OnEndDrag to avoid compication
 		protected virtual void UnregisterPointer(PointerEventData eventData) {
 			touchCount--;
-			if(touchCount < 0) Debug.LogError("PinchInputDetector - Touch Count Mismatch");
+			if (touchCount < 0) Debug.LogError("PinchInputDetector - Touch Count Mismatch");
 			if (IsEqualPointer(firstPointer, eventData)) {
 				// first touch removed
 				if (pinching) {
@@ -67,7 +67,7 @@
 				secondPointer = null;
 			}
 		}
-		
+
 		public virtual void OnBeginDrag(PointerEventData eventData) {
 			RegisterPointer(eventData);
 			if (touchCount == 1) return; // default behaviour
@@ -94,7 +94,7 @@
 			if (IsEqualPointer(firstPointer, eventData)) {
 				// first touch dragging
 				firstPointer = eventData;
-				if(secondPointer != null) CalculateDistanceDelta();
+				if (secondPointer != null) CalculateDistanceDelta();
 				if (pinching) {
 					eventData.Use();
 					FireOnPinchZoom(new PinchEventData(firstPointer, secondPointer, delta));
@@ -102,7 +102,7 @@
 			} else if (IsEqualPointer(secondPointer, eventData)) {
 				// second touch dragging
 				secondPointer = eventData;
-				if(firstPointer != null) CalculateDistanceDelta();
+				if (firstPointer != null) CalculateDistanceDelta();
 				if (pinching) {
 					eventData.Use();
 					FireOnPinchZoom(new PinchEventData(secondPointer, firstPointer, delta));
@@ -118,7 +118,7 @@
 			if (b == null) return false;
 			return a.pointerId == b.pointerId;
 		}
-		
+
 		protected virtual void CalculateDistanceDelta() {
 			float newDistance = Vector2.Distance(firstPointer.position, secondPointer.position);
 			delta = newDistance - previousDistance;
@@ -131,14 +131,14 @@
 				pinchStartHandlers[i].OnPinchStart(data);
 			}
 		}
-		
+
 		protected virtual void FireOnPinchEnd(PinchEventData data) {
 			if (pinchEndHandlers == null) return;
 			for (int i = 0; i < pinchEndHandlers.Length; i++) {
 				pinchEndHandlers[i].OnPinchEnd(data);
 			}
 		}
-		
+
 		protected virtual void FireOnPinchZoom(PinchEventData data) {
 			if (pinchZoomHandlers == null) return;
 			for (int i = 0; i < pinchZoomHandlers.Length; i++) {

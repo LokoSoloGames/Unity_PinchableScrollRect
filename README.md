@@ -11,6 +11,9 @@ Pinchable ScrollRect allows users to zoom in and out on the ScrollRect with both
 
 ## Getting Started
 * Use it same as the way you use the Unity ScrollRect component.
+* Add a UI/ScrollView from the GameObject Menu
+* Select the ScrollRect added, click on the context dropdown menu
+* Select "Replace as Pinchable"
 
 ## Important Remarks
 * PinchInputDetector component must have a higher execution order than PinchableScrollRect component or any IPinchHandler component in order to consume the original OnDrag pointer event beforehand.

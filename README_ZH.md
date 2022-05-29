@@ -11,6 +11,9 @@
 
 ## 入門
 * 使用方式與Unity 滾動矩形(ScrollRect) 的方式相同。
+* 從 GameObject 選單中創建 UI/ScrollView
+* 選擇新創建的的 ScrollRect，點擊其右上選單
+* 點選 "Replace as Pinchable"
 
 ## 備注
 * PinchInputDetector 組件必須具有比 PinchableScrollRect 組件或任何 IPinchHandler 組件更高的執行順序，以先消耗OnDrag 指針事件。
