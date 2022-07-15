@@ -117,7 +117,8 @@ namespace UnityEngine.UI {
 		protected virtual void HandleZoom(float zoomValue) {
 			Vector3 _localScale = content.localScale;
 			Rect _rect = content.rect;
-
+			Vector3 _worldPos = content.position;
+			
 			// Set to new pivot before scaling
 			Vector2 pivotDelta = new Vector2(zoomPosDelta.x / _rect.width / Mathf.Max(1f, _localScale.x), zoomPosDelta.y / _rect.height / Mathf.Max(1f, _localScale.y));
 			this.UpdateBounds();
@@ -129,8 +130,8 @@ namespace UnityEngine.UI {
 				Mathf.Clamp(newScale.y, lowerScale.y, upperScale.y),
 				Mathf.Clamp(newScale.z, lowerScale.z, upperScale.z));
 			this.SetContentLocalScale(newScale);
-			// The anchored pos changed due to changes in pivot
-			this.SetContentAnchoredPosition(content.anchoredPosition + zoomPosDelta);
+			// The world position should remain the same
+			content.position = _worldPos + (Vector3)zoomPosDelta; // compensate for value due to pivot change
 			// Reset delta since zooming deceleration take place at the same pivot
 			zoomPosDelta = Vector2.zero;
 		}
