@@ -1,9 +1,12 @@
-﻿using UnityEngine.EventSystems;
+﻿using System;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace UnityEngine.UI {
 	[DisallowMultipleComponent]
 	[RequireComponent(typeof(RectTransform))]
 	public class PinchableScrollRect : ScrollRect, IPinchStartHandler, IPinchEndHandler, IPinchZoomHandler {
+		[Header("Pinch Settings")]
 		[SerializeField] protected bool resetOnEnable = true;
 		[SerializeField] protected bool lockPinchCenter = true;
 
@@ -22,7 +25,18 @@ namespace UnityEngine.UI {
 		[SerializeField, Range(1f, 0f)] protected float zoomDeceleration = 0.8f;
 
 		bool initialized = false;
-
+		Canvas _canvas;
+		
+		[Serializable]
+		public class PinchEvent : UnityEvent<Vector3> { }
+		[SerializeField] PinchEvent _onScaleChanged = new PinchEvent();
+		public PinchEvent onScaleChanged { get { return _onScaleChanged; } set { _onScaleChanged = value; } }
+		
+		protected override void Awake() {
+			base.Awake();
+			_canvas = GetComponentInParent<Canvas>();
+		}
+		
 		protected override void Start() {
 			base.Start();
 			initPivot = content.pivot;
@@ -119,8 +133,9 @@ namespace UnityEngine.UI {
 			Rect _rect = content.rect;
 			Vector3 _worldPos = content.position;
 			
+			Vector2 pixelDelta = new Vector2(zoomPosDelta.x / Mathf.Max(1f, _localScale.x), zoomPosDelta.y / Mathf.Max(1f, _localScale.x));
 			// Set to new pivot before scaling
-			Vector2 pivotDelta = new Vector2(zoomPosDelta.x / _rect.width / Mathf.Max(1f, _localScale.x), zoomPosDelta.y / _rect.height / Mathf.Max(1f, _localScale.y));
+			Vector2 pivotDelta = new Vector2(pixelDelta.x / _rect.width, pixelDelta.y / _rect.height);
 			this.UpdateBounds();
 			this.SetContentPivotPosition(content.pivot + pivotDelta);
 			// Then set scale
@@ -131,7 +146,7 @@ namespace UnityEngine.UI {
 				Mathf.Clamp(newScale.z, lowerScale.z, upperScale.z));
 			this.SetContentLocalScale(newScale);
 			// The world position should remain the same
-			content.position = _worldPos + (Vector3)zoomPosDelta; // compensate for value due to pivot change
+			content.position = _worldPos + (Vector3)pixelDelta * _canvas.scaleFactor; // compensate for value due to pivot change
 			// Reset delta since zooming deceleration take place at the same pivot
 			zoomPosDelta = Vector2.zero;
 		}
@@ -153,11 +168,18 @@ namespace UnityEngine.UI {
 			if (invalidY) newScale.y = _viewRect.height / _rect.height;
 			if (invalidX || invalidY) ResetZoom();
 			content.localScale = newScale;
+			_onScaleChanged.Invoke(newScale);
 		}
 
 		protected void ResetZoom() {
 			zoomVelocity = 0f;
 			zoomPosDelta = Vector2.zero;
+		}
+
+		// For External Control
+		public void SetNormalizedScale(float normalized) {
+			var newScale = Vector3.Lerp(lowerScale, upperScale, normalized);
+			SetContentLocalScale(newScale);
 		}
 
 		public virtual void ResetContent() {
@@ -166,6 +188,7 @@ namespace UnityEngine.UI {
 			content.anchoredPosition = initAnchored;
 			content.localScale = initScale;
 			this.UpdateBounds();
+			_onScaleChanged.Invoke(initScale);
 		}
 
 		// Block scroll rect default dragging behaviour when multiple touches are detected

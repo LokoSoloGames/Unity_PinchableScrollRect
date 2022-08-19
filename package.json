@@ -1,6 +1,6 @@
 {
   "name": "com.lokosolo.pinchable-scrollrect",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "displayName": "Pinchable ScrollRect",
   "description": "Pinchable ScrollRect allows users to zoom in and out on the ScrollRect with both touches pinching input or mouse scroll input.",
   "unity": "2018.4",
