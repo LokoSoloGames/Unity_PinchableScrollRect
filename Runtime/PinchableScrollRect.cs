@@ -146,9 +146,22 @@ namespace UnityEngine.UI {
 				Mathf.Clamp(newScale.z, lowerScale.z, upperScale.z));
 			this.SetContentLocalScale(newScale);
 			// The world position should remain the same
-			content.position = _worldPos + (Vector3)pixelDelta * _canvas.scaleFactor; // compensate for value due to pivot change
+			content.position = _worldPos + (Vector3)pixelDelta * getScaleFactor(); // compensate for value due to pivot change
 			// Reset delta since zooming deceleration take place at the same pivot
 			zoomPosDelta = Vector2.zero;
+		}
+
+		float getScaleFactor() {
+			switch (_canvas.renderMode) {
+				case RenderMode.ScreenSpaceOverlay:
+					return _canvas.scaleFactor;
+				case RenderMode.ScreenSpaceCamera:
+					return _canvas.scaleFactor / _canvas.referencePixelsPerUnit;
+				case RenderMode.WorldSpace:
+					return _canvas.transform.localScale.x;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 		protected virtual void SetContentPivotPosition(Vector2 pivot) {
