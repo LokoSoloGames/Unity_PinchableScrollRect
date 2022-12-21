@@ -14,6 +14,7 @@ namespace UnityEngine.UI {
 		private Vector3 initScale;
 		private float zoomVelocity = 0f;
 		private Vector2 zoomPosDelta = Vector2.zero;
+		private bool updatePivot;
 
 		protected bool isZooming = false;
 		protected Vector2 pinchStartPos;
@@ -85,6 +86,7 @@ namespace UnityEngine.UI {
 			isZooming = true;
 			zoomVelocity = zoomValue;
 			zoomPosDelta = localPos;
+			updatePivot = true;
 		}
 
 		public override void OnScroll(PointerEventData eventData) {
@@ -103,6 +105,7 @@ namespace UnityEngine.UI {
 			isZooming = true;
 			zoomVelocity = zoomValue;
 			zoomPosDelta = localPos;
+			updatePivot = true;
 		}
 
 		protected virtual void Update() {
@@ -131,37 +134,36 @@ namespace UnityEngine.UI {
 		protected virtual void HandleZoom(float zoomValue) {
 			Vector3 _localScale = content.localScale;
 			Rect _rect = content.rect;
-			Vector3 _worldPos = content.position;
-			
-			Vector2 pixelDelta = new Vector2(zoomPosDelta.x / Mathf.Max(1f, _localScale.x), zoomPosDelta.y / Mathf.Max(1f, _localScale.x));
-			// Set to new pivot before scaling
-			Vector2 pivotDelta = new Vector2(pixelDelta.x / _rect.width, pixelDelta.y / _rect.height);
-			this.UpdateBounds();
-			this.SetContentPivotPosition(content.pivot + pivotDelta);
-			// Then set scale
+
+			if (updatePivot) {
+				var _anchorMin = content.anchorMin;
+				var _anchorMax = content.anchorMax;
+				var _localPos = content.localPosition;
+				// Set to new pivot before scaling
+				Vector2 pivotDelta = new Vector2(zoomPosDelta.x / _rect.width, zoomPosDelta.y / _rect.height);
+				// Set fixed anchor to avoid incorrect calculation due to stretched anchors
+				content.anchorMin = new Vector2(0.5f, 0.5f);
+				content.anchorMax = new Vector2(0.5f, 0.5f);
+				this.UpdateBounds();
+				this.SetContentPivotPosition(content.pivot + pivotDelta);
+				// Apply position compensation due to pivot change
+				_localPos += new Vector3(zoomPosDelta.x * _localScale.x, zoomPosDelta.y * _localScale.y);
+				// Reset to original anchors
+				content.anchorMin = _anchorMin;
+				content.anchorMax = _anchorMax;
+				// Apply final position
+				content.localPosition = _localPos;
+			}
+			// Set scale
 			Vector3 newScale = _localScale + Vector3.one * zoomValue;
 			newScale = new Vector3(
 				Mathf.Clamp(newScale.x, lowerScale.x, upperScale.x),
 				Mathf.Clamp(newScale.y, lowerScale.y, upperScale.y),
 				Mathf.Clamp(newScale.z, lowerScale.z, upperScale.z));
 			this.SetContentLocalScale(newScale);
-			// The world position should remain the same
-			content.position = _worldPos + (Vector3)pixelDelta * getScaleFactor(); // compensate for value due to pivot change
 			// Reset delta since zooming deceleration take place at the same pivot
 			zoomPosDelta = Vector2.zero;
-		}
-
-		float getScaleFactor() {
-			switch (_canvas.renderMode) {
-				case RenderMode.ScreenSpaceOverlay:
-					return _canvas.scaleFactor;
-				case RenderMode.ScreenSpaceCamera:
-					return _canvas.scaleFactor / _canvas.referencePixelsPerUnit;
-				case RenderMode.WorldSpace:
-					return _canvas.transform.localScale.x;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			updatePivot = false;
 		}
 
 		protected virtual void SetContentPivotPosition(Vector2 pivot) {
@@ -175,11 +177,11 @@ namespace UnityEngine.UI {
 		protected virtual void SetContentLocalScale(Vector3 newScale) {
 			Rect _rect = content.rect;
 			Rect _viewRect = viewRect.rect;
-			bool invalidX = _rect.width * newScale.x < _viewRect.width;
-			bool invalidY = _rect.height * newScale.y < _viewRect.height;
-			if (invalidX) newScale.x = _viewRect.width / _rect.width;
-			if (invalidY) newScale.y = _viewRect.height / _rect.height;
-			if (invalidX || invalidY) ResetZoom();
+			// bool invalidX = _rect.width * newScale.x < _viewRect.width;
+			// bool invalidY = _rect.height * newScale.y < _viewRect.height;
+			// if (invalidX) newScale.x = _viewRect.width / _rect.width;
+			// if (invalidY) newScale.y = _viewRect.height / _rect.height;
+			// if (invalidX || invalidY) ResetZoom();
 			content.localScale = newScale;
 			_onScaleChanged.Invoke(newScale);
 		}
@@ -187,6 +189,7 @@ namespace UnityEngine.UI {
 		protected void ResetZoom() {
 			zoomVelocity = 0f;
 			zoomPosDelta = Vector2.zero;
+			updatePivot = false;
 		}
 
 		// For External Control
