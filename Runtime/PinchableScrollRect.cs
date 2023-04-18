@@ -123,6 +123,11 @@ namespace UnityEngine.UI {
 		}
 
 		protected override void LateUpdate() {
+			if (movementType == MovementType.Clamped) {
+				base.LateUpdate(); // Apply clamp on every update
+				return;
+			}
+			
 			if (isZooming) {
 				isZooming = false;
 				this.UpdatePrevData(); // Avoid dragging in next frame produces inaccurate velocity
@@ -175,8 +180,8 @@ namespace UnityEngine.UI {
 		}
 
 		protected virtual void SetContentLocalScale(Vector3 newScale) {
-			Rect _rect = content.rect;
-			Rect _viewRect = viewRect.rect;
+			// Rect _rect = content.rect;
+			// Rect _viewRect = viewRect.rect;
 			// bool invalidX = _rect.width * newScale.x < _viewRect.width;
 			// bool invalidY = _rect.height * newScale.y < _viewRect.height;
 			// if (invalidX) newScale.x = _viewRect.width / _rect.width;
@@ -228,7 +233,7 @@ namespace UnityEngine.UI {
 
 #if UNITY_EDITOR
 	[UnityEditor.CustomEditor(typeof(PinchableScrollRect))]
-	public class PinchableScrollRectEditor : UnityEditor.Editor {
+	public class PinchableScrollRectEditor : UnityEditor.UI.ScrollRectEditor {
 		public override void OnInspectorGUI() {
 			PinchableScrollRect script = (PinchableScrollRect)target;
 			if (script.GetComponent<PinchInputDetector>() == null) {
@@ -238,6 +243,16 @@ namespace UnityEngine.UI {
 				}
 			}
 			base.OnInspectorGUI();
+
+			var flag = System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+			foreach (var field in typeof(PinchableScrollRect).GetFields(flag)) {
+				var property = serializedObject.FindProperty(field.Name);
+				if (property != null) {
+					UnityEditor.EditorGUILayout.PropertyField(property);
+				}
+			}
+			serializedObject.ApplyModifiedProperties();
+
 			var _lowerScale = script.lowerScale;
 			if (_lowerScale.x < 1f || _lowerScale.y < 1f || _lowerScale.z < 1f) {
 				UnityEditor.EditorGUILayout.HelpBox("Lower Scale cannot be less than 1", UnityEditor.MessageType.Error);
