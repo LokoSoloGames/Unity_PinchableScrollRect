@@ -26,17 +26,11 @@ namespace UnityEngine.UI {
 		[SerializeField, Range(1f, 0f)] protected float zoomDeceleration = 0.8f;
 
 		bool initialized = false;
-		Canvas _canvas;
-		
+
 		[Serializable]
 		public class PinchEvent : UnityEvent<Vector3> { }
 		[SerializeField] PinchEvent _onScaleChanged = new PinchEvent();
 		public PinchEvent onScaleChanged { get { return _onScaleChanged; } set { _onScaleChanged = value; } }
-		
-		protected override void Awake() {
-			base.Awake();
-			_canvas = GetComponentInParent<Canvas>();
-		}
 		
 		protected override void Start() {
 			base.Start();

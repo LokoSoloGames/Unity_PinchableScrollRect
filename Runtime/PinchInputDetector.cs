@@ -1,6 +1,8 @@
-﻿namespace UnityEngine.EventSystems {
+﻿using UnityEngine.Events;
+
+namespace UnityEngine.EventSystems {
 	[DisallowMultipleComponent]
-	public class PinchInputDetector : UIBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler {
+	public class PinchInputDetector : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler {
 		/* Calling Order: OnBeginDrag -> OnDrag -> OnEndDrag */
 
 		private IPinchStartHandler[] pinchStartHandlers;
@@ -15,8 +17,10 @@
 		private float previousDistance = 0f;
 		private float delta = 0f;
 
-		protected override void Awake() {
-			base.Awake();
+		[SerializeField] protected UnityEvent onPinchStart;
+		[SerializeField] protected UnityEvent onPinchEnd;
+
+		protected virtual void Awake() {
 			pinchStartHandlers = GetComponents<IPinchStartHandler>();
 			pinchEndHandlers = GetComponents<IPinchEndHandler>();
 			pinchZoomHandlers = GetComponents<IPinchZoomHandler>();
@@ -126,6 +130,9 @@
 		}
 
 		protected virtual void FireOnPinchStart(PinchEventData data) {
+			if (onPinchStart != null) {
+				onPinchStart.Invoke();
+			}
 			if (pinchStartHandlers == null) return;
 			for (int i = 0; i < pinchStartHandlers.Length; i++) {
 				pinchStartHandlers[i].OnPinchStart(data);
@@ -133,6 +140,9 @@
 		}
 
 		protected virtual void FireOnPinchEnd(PinchEventData data) {
+			if (onPinchEnd != null) {
+				onPinchEnd.Invoke();
+			}
 			if (pinchEndHandlers == null) return;
 			for (int i = 0; i < pinchEndHandlers.Length; i++) {
 				pinchEndHandlers[i].OnPinchEnd(data);
